@@ -1,0 +1,302 @@
+## Game design document — version 1.1
+
+**Revision:** Added the medical-data connection, explicit ADH feedback, classroom manipulatives, language supports, causal flowcharts, and regulatory-capacity investigations. This revision also makes assessment evidence, UDL supports, interaction states, and release boundaries explicit. Reviewer notes explain retained distinctions between clinical reference ranges, regulatory capacity, and simulation boundaries. Version 1.1 supersedes the generic kidney controller and four-investigation scope in version 1.0.
+
+**Status:** Design draft; numerical parameters require prototype validation.  
+**Audience:** Middle-school biology students, approximately ages 11–14.  
+**Curriculum:** Supplement to New Visions Biology, Marathon Runner.  
+**Format:** Single-screen 2D investigation simulator; 15–25-minute classroom activity.  
+**Platform:** Browser on school Chromebooks, with desktop development builds.  
+**Engine:** Godot; use the existing project’s compatible version and Compatibility renderer. The project configuration declares 4.5 features, while its older design document names 4.7; confirm the installed version before implementation.  
+**Relationship to existing project:** Proposed separate Water Balance view, reusing appropriate cell visualization components. This document does not replace DESIGN.md or change the original osmosis and red-blood-cell modes.
+
+## 1. Concept and purpose
+
+Students control a runner’s drinking and activity, then observe how water and dissolved substances move through a simplified body. A magnified animal cell connects whole-body changes to osmosis. Kidneys respond to changing conditions, but their response takes time and has limits.
+
+The central investigation is: **How can drinking and sweating change the size of cells inside the body?**
+
+The simulator bridges two investigations: students have observed onion cells respond to surrounding solutions; now they explore how the solution surrounding animal cells can change inside a living organism. New Visions officially publishes Marathon Runner as high-school Biology; the interface and activity described here are adaptations for younger students.
+
+Students use evidence to explain how water intake, water loss, and kidney regulation can produce an imbalance consistent with the runner’s medical data. Hyponatremia—low blood sodium concentration—is an explicit curricular explanation to investigate and discuss. The simulator supplies qualitative mechanisms; authentic curriculum data supplies the measured sodium evidence.
+
+The experience rewards making predictions and comparing evidence. There are no points, survival timer, or injury animations. Students investigate conditions that support compensation and conditions that overwhelm it, rather than finding one universally correct drinking rate.
+
+**Reviewer rationale:** Explaining the runner’s excessive water intake is compatible with rejecting a universal drinking prescription; a context-dependent mechanism is the intended discovery.
+
+## 2. Learning objectives
+
+After comparing runs, students should be able to:
+
+- Distinguish the amount of dissolved solute from its concentration.
+- Explain the chain: water gain/loss → outside-cell concentration → net water movement → cell volume.
+- Explain why a cell can shrink even though none of its modeled solute leaves.
+- Explain how ADH signaling changes kidney water retention and urine output, with a delay and limited capacity.
+- Connect swelling and shrinking to hypotonic, isotonic, and hypertonic surroundings relative to the current cell.
+- Compare curriculum medical-tent sodium data with its supplied 135–145 mEq/L reference range, then connect the evidence to the model’s dilution mechanism.
+- Use two graphs or recorded observations to support an explanation.
+- Identify at least one simplification that limits the model.
+
+The instructional emphasis is systems, cause and effect, and interpreting models. The investigation supports HS-LS1-3 by having students select a variable, hold other conditions constant, collect comparative evidence, and explain feedback maintaining homeostasis. Full alignment requires lesson-level planning and assessment; the simulator alone does not establish mastery. Cellular detail is explanatory enrichment rather than a required assessed component of that performance expectation.
+
+**Reviewer rationale:** Hitting an endpoint does not demonstrate HS-LS1-3; investigating both successful compensation and persistent imbalance provides stronger evidence of understanding.
+
+### Evidence of learning
+
+The minimum student product is a comparison record, not a score: one prediction, two selected observations or graph features, a statement of the changed condition, a causal explanation, and one model limitation. A student may provide this product by writing, speaking, arranging tokens, selecting labeled phrases, or drawing a flowchart. The simulator may save this evidence only in the current page session; it must not infer mastery, assign a grade, or transmit student-identifying data.
+
+Teacher-facing success checks are: (1) the student distinguishes amount from concentration, (2) identifies the direction of net water movement from current concentrations, (3) uses ADH and urine output as evidence of feedback, and (4) qualifies the medical-data connection as a model-based explanation rather than a diagnosis.
+
+## 3. Student experience
+
+1. **Choose an investigation.** Read one short question and inspect the starting state.
+2. **Predict.** Choose “swells,” “shrinks,” or “stays near starting size.” Predictions are optional and ungraded.
+3. **Set conditions.** Select activity and drinking rate.
+4. **Run and observe.** Watch body flows, the cell, and linked graphs.
+5. **Pause and inspect.** Read observations; optionally use a token snapshot or partially completed causal flowchart.
+6. **Keep the run.** Store it as A or B, reset to the same starting state, and change one condition.
+7. **Compare and explain.** Use the overlay and prompts to explain the difference.
+
+Every investigation is available immediately. Free Explore permits live control changes; guided comparisons keep initial controls fixed after starting, so the comparison remains interpretable.
+
+Provide teacher-selected **Investigate** and **Explain** presentation settings. Investigate is the default: observations, data, vocabulary definitions, and incomplete sentence frames are available, but the interface does not diagnose the runner or automatically complete causal links. Explain adds worked causal chains and the hyponatremia interpretation after students have reasoned from evidence. These are instructional settings, not secured assessment modes. The setting must be visible in Help and in any teacher launch instructions; changing it never resets a run or changes model behavior.
+
+For guided investigations, show the comparison contract before Run: which control is fixed, which control changes, whether the comparison is Automatic or Fixed output, and which evidence to collect. After Run starts, lock only the controls that would invalidate that contract; Pause, Restart, observation views, and accessibility supports remain available. Free Explore clearly marks any live control change as an event on the trace.
+
+**Reviewer rationale:** An automatic “Hyponatremia reached” message would supply an inference students may still be expected to make; teachers can reveal terminology and explanations when appropriate to their assessment goal.
+
+## 4. Screen and visual design
+
+Use a responsive landscape layout targeting the existing 1280 × 800 viewport.
+
+| Region | Content and purpose |
+|---|---|
+| Top bar | Water Balance title, investigation selector, Help, return to Osmosis |
+| Left | Runner silhouette, drinking input, sweating output, brain/pituitary signal source, ADH indicator, kidney/urine output |
+| Center | Body-fluid reservoir, separate water and solute amount readouts, concentration indicator |
+| Right | Magnified animal cell, fixed starting-size outline, inside/outside concentrations, net-flow arrow |
+| Lower panel | Two aligned plots: relative outside concentration and relative cell volume, with starting-value lines and a shared time axis; alternate causal-flowchart view |
+| Bottom controls | Activity, drinking, Run/Pause, Restart run, Keep A/B, Compare, Clear comparisons |
+
+Label the reservoir **“Fluid outside cells”** and explain that it combines blood plasma and fluid between cells. The drawing must not imply all body water is blood or that a tissue cell sits directly inside a blood vessel.
+
+Show a kidney as a simplified control symbol on an output branch. Label its output “Water and solute leaving in urine.” Do not depict the kidney as a membrane that simply drains water through osmosis.
+
+Add a distinct signal path from the brain/pituitary symbol to the kidney. ADH uses labeled purple message symbols, separate from water and solute. The default display is an ADH signal meter; an optional animation sends message symbols along the path. Label these as signals, not particles counted in the water/solute ledger. Increasing signal visibly increases water retention and reduces urine water output. Detailed receptor and nephron anatomy is unnecessary.
+
+Water uses blue circles; solute uses yellow diamonds with dark outlines. Match physical classroom manipulatives where practical, while retaining shape and text distinctions. Particle density illustrates concentration; numeric model state is authoritative. A small legend says “Particles and sizes are illustrative.”
+
+The medical-data card displays **“Curriculum plasma sodium reference: 135–145 mEq/L”** and identifies its curriculum edition. Verified case values may appear beside a shaded reference band, or students can compare their printed medical-tent data. Do not invent missing case values. Keep the card visually separate from simulated relative concentration and the reservoir’s water-level scale.
+
+**Reviewer rationale:** The current model tracks generic effective solute, not sodium. Adding mEq/L to its axis would imply unsupported calibration; a future simulated sodium graph requires an explicit sodium model and validation first. The cell-volume graph retains a starting-value line because no universal healthy cell-volume band has been established here.
+
+The causal-flowchart view uses boxes for disturbance, detected change, ADH signal, kidney response, and resulting conditions. The return arrow states how the response reduces the original disturbance. Students can complete missing links orally, with tokens, on paper, or with selectable phrases. Explain reveals the worked chain. Match classroom flowchart conventions after checking the teacher’s materials.
+
+Use labeled status badges near the runner for observed trends, not red/blue skin changes.
+
+**Reviewer rationale:** A symbolic status badge is easier to interpret without suggesting that silhouette color is a diagnostic sign of dehydration or hyponatremia.
+
+Reuse the fixed neutral outline from the existing simulator. Preserve its 2× visual radius amplification around the initial radius, with a persistent “Size changes exaggerated” label. The graph reports actual modeled volume, not amplified screen radius. The membrane and particle boundary must use the same displayed radius.
+
+Art is clean, restrained, and diagrammatic. Required assets are a runner silhouette, cup, sweat drops, brain/pituitary and kidney icons, ADH message symbols, arrows, and cell membrane. Audio is unnecessary for the first release.
+
+## 5. Controls and feedback
+
+| Control | Behavior |
+|---|---|
+| Activity | Rest / Jog / Run; changes sweat output only in this model |
+| Drinking | None / Low / Medium / High; continuous intake rate rather than repeated clicking |
+| Run/Pause | Freezes or resumes model time, particles, arrows, runner motion, and graphs together |
+| Restart run | Restores neutral state and time zero; retains selected controls and saved A/B runs |
+| Keep A/B | Stores the current trace, settings, events, prediction, and model version |
+| Compare | Overlays saved traces with labels and distinct line styles; switches to causal-flowchart comparison |
+| Kidney response | Automatic / Fixed output; exposed only in the feedback investigation and Free Explore |
+| Token snapshot | Pauses and opens a simplified countable representation for desk manipulatives |
+| Presentation | Teacher selects Investigate or Explain; accessibility supports remain available in both |
+
+The default scene opens paused. Changing investigation initializes its defaults and a new neutral run; saved A/B traces remain until explicitly cleared. Returning from another simulation mode also starts a neutral, paused water-balance run.
+
+Use qualitative readouts first: “Outside becoming more concentrated,” “Net water movement: out,” and “Cell smaller than at start.” Optional Details reveals relative numbers and water/solute ledgers. Describe net flow as balanced within a small numerical tolerance, while water particles continue moving both ways.
+
+Pair those observations with “Outside hypotonic / isotonic / hypertonic relative to the current cell.” Determine the label from current inside/outside concentrations, not from drinking settings or comparison with the initial cell. Show a short definition on focus or click; retain directional language for students still learning the terms.
+
+Generated simulation outputs use relative units and “model time,” not liters, clinical sodium values, or real exercise durations. Baseline is labeled “Starting value.” Authentic sodium measurements and their reference range appear only in the separate curriculum-data card.
+
+## 6. Scientific model
+
+### Compartments and conservation
+
+Represent two finite, well-mixed compartments: outside-cell fluid and aggregate intracellular fluid. The displayed cell represents the behavior of the intracellular compartment; it is not literally large enough to change the whole body’s water balance.
+
+Track outside water `W_out`, outside effective solute `S_out`, intracellular water `W_in`, and intracellular effective solute `S_in`. Initial values are `1, 1, 2, 2`, respectively, so both concentrations begin at 1. These are teaching units, not a physiological calibration.
+
+Define `C_out = S_out / W_out` and `C_in = S_in / W_in`. Solute represents a simplified mixture of effectively nonpenetrating particles, not every substance dissolved in blood. Intracellular solute stays fixed.
+
+Drinking adds water to the outside compartment after a short absorption delay. Sweating removes water and solute; the modeled sweat is less concentrated than outside fluid. Urine removes water and a simplified solute amount. Every transfer updates a cumulative ledger. Do not silently create, destroy, or reset solute to force a desired result.
+
+### Osmosis
+
+Net water flux into cells is `J = k × (C_in − C_out)`. Apply equal-and-opposite transfers to the two compartments. Higher outside concentration produces outward flow; lower outside concentration produces inward flow. Reduce the concentration difference gradually; never jump directly to an equilibrium size.
+
+The cell-volume ratio is `W_in / 2`. Derive the unamplified radius ratio from its cube root, then apply the existing display amplification. This preserves the distinction between volume and radius.
+
+### Kidney response
+
+Automatic mode explicitly models an abstract ADH signal. Increased outside concentration or reduced outside water raises the signal; dilution or increased outside water lowers it. More ADH increases kidney water retention, reducing urine output. This represents the causal role of hormonal feedback, not measured hormone concentrations or detailed nephron physiology.
+
+Prototype target rule:
+
+`H_target = clamp(H_base + g_c × (C_out − 1) + g_w × (1 − W_out), 0, 1)`
+
+`H_next = H + (H_target − H) × (1 − exp(−dt / tau_H))`
+
+`U = U_min + (U_max − U_min) × (1 − H)`
+
+Choose `H_base = 1 − (U_base − U_min) / (U_max − U_min)` so baseline urine output remains consistent. Initialize H at H_base. More signal means less urine water loss. These equations replace, rather than supplement, the version 1.0 direct-output controller; retune and validate the resulting dynamics.
+
+Fixed mode holds urine output at `U_base`; label it “Comparison model: output cannot adjust.” H may still respond, but the kidney connection is visibly marked “Response held fixed.” Do not label the comparison as kidney failure.
+
+**Reviewer rationale:** ADH is a causal message, not water or salt, and does not directly add blood volume. Retention reduces losses. Fixed output is an experimental comparison, not a diagnosis.
+
+### Starting parameters for prototype tuning
+
+| Parameter | Initial proposal |
+|---|---|
+| Fixed integration step | 0.02 model-time units |
+| Run length | 60 model-time units; 1 unit per real second |
+| Drinking rates | 0 / 0.003 / 0.009 / 0.030 water units per model-time unit |
+| Absorption lag | 3 model-time units; smooth rate response starting at zero |
+| Sweat rates: Rest / Jog / Run | 0 / 0.004 / 0.008 |
+| Sweat solute concentration | 0.3 × current outside concentration |
+| Urine output: minimum / baseline / maximum | 0.0002 / 0.001 / 0.012 |
+| ADH signal gains `g_c`, `g_w` | 2.0 and 0.5; provisional, replacing the former output-controller gains |
+| ADH signal lag `tau_H` | 5 model-time units |
+| Urine effective solute concentration | 0.2 × current outside concentration |
+| Osmosis coefficient `k` | 0.08 |
+
+These values are design hypotheses, not verified outcomes. Tune against the acceptance criteria before classroom release. A run without drinking can slowly lose water even at rest; do not manufacture perfect baseline stability.
+
+The urine-solute fraction is a bookkeeping simplification, not a prediction of urine chemistry. Do not display urine-color or urine-concentration conclusions based on it. Independent salt regulation, detailed hormonal pathways, blood pressure, and exercise-associated non-osmotic ADH release are outside this model. The basic loop therefore illustrates one mechanism and cannot reproduce all causes of exercise-associated hyponatremia.
+
+### Limits and edge cases
+
+Apply each external transfer using available water and solute, then recompute concentrations before calculating osmosis. Limit osmosis to available donor water and prevent numerical overshoot. Use a fixed, documented update order for reproducible runs.
+
+Pause at the first model-domain boundary: either water compartment below 25% of its starting amount, either concentration outside 0.5–1.5, or intracellular volume outside 0.65–1.4 of its start. Record the endpoint and say **“Model limit reached. Compare this run or restart.”** Boundaries are simulation limits, not injury thresholds. Do not clamp one compartment without conserving the transferred amount.
+
+Before an endpoint, report evidence such as “Outside concentration continues falling while urine output is at its modeled maximum.” This describes regulatory capacity without declaring a medical condition. Explain may connect the observed dilution mechanism to low sodium in the separate case data.
+
+**Reviewer rationale:** A clinical reference range, limited regulatory capacity, and the boundary of a software model are different concepts. The provisional stopping values must not be renamed dehydration or hyponatremia thresholds. Hyponatremia means low sodium concentration and is not interchangeable with “water toxicity” or kidney failure.
+
+The cell does not rupture. Existing red-blood-cell rupture behavior remains exclusive to that separate mode. No clinical diagnosis or individualized hydration recommendation is generated.
+
+## 7. Investigations
+
+| Investigation | Comparison | Evidence students explain |
+|---|---|---|
+| Where does cell water go? | Same activity, None versus Low drinking | Outside concentration rises as water is lost; cell water can move outward |
+| Can added water change a cell? | Same activity, Low versus High drinking | Additional water can dilute outside fluid and shift net movement inward |
+| What do the kidneys change? | Same drinking/activity, Automatic versus Fixed output | ADH changes, urine output responds after a delay, and the trajectories differ |
+| When can feedback compensate? | Hold activity at Run; compare None, an intermediate setting, and High drinking in successive A/B pairs | Identify compensation versus persistent imbalance using ADH, urine output, and concentration trends; endpoint contact is not required |
+| Explain the runner | Students select a pair of conditions and compare the curriculum medical-tent sodium data with its reference range | A causal explanation connects inputs, outputs, concentration, and cell size; Explain names the hyponatremia connection |
+
+Scenario wording must follow validated prototype behavior. Do not label Medium drinking as universally balanced. These are comparative experiments, not hydration prescriptions.
+
+Validate that at least one selected intermediate condition demonstrates compensation during the observation window, and that contrasting conditions show persistent imbalance. If the window is too short, extend model duration or offer common 1×/2×/4× time acceleration for all runs; keep numerical integration steps and model-time graph axes unchanged.
+
+**Reviewer rationale:** Increasing an activity’s physiological effects merely to force a classroom-time failure would confuse intensity with duration. The investigation concerns compensatory capacity, not a challenge to break the runner.
+
+Optional transfer prompt: “How might a freshwater fish respond to a saltier environment?” Link to the existing osmosis view for cell-level reasoning and have students identify where the analogy stops. Confirm the goldfish activity’s placement against the teaching edition before citing it as required curriculum.
+
+**Reviewer rationale:** A fish’s external water is not equivalent to human extracellular fluid, and a runner model omits fish-specific regulation. A separate transfer task is more defensible than relabeling the runner’s hypertonic scenario as a goldfish simulation.
+
+Suggested prompts: “Which changed first?” “Did the cell lose solute or water?” “What evidence shows the kidneys responded?” “What part of the real body is missing from this model?”
+
+## 8. Accessibility and classroom use
+
+Apply Universal Design for Learning by offering multiple means of **engagement** (choice of investigation, optional prediction, pair roles, no penalty for restarting), **representation** (diagram, text observation, graphs, flowchart, tokens, definitions, and directional language), and **action/expression** (mouse, touchpad, keyboard, selectable phrases, drawing, oral explanation, or written response). No single representation is required for every learner, and supports should be independently selectable rather than tied to a diagnosis.
+
+Support mouse, touchpad, touch buttons, and keyboard navigation with visible focus. Space toggles pause except while a control consumes the key. Provide controls at least 44 pixels high and readable text at the target viewport. Tooltips must also open on focus or click.
+
+Reduced Motion removes decorative drift while retaining numeric and arrow feedback. A text observation panel reports the same key changes shown in animation. Browser screen-reader compatibility must be tested rather than assumed for a Godot canvas. The non-canvas equivalent must expose, in focus order, the current run state, controls and values, model-time, outside concentration trend, cell-volume trend, ADH trend, urine-output trend, endpoint reason, and A/B labels.
+
+Use color plus text, shape, line style, or position for every distinction; meet the project’s contrast target and do not rely on red/green or blue/yellow alone. Support browser zoom and reasonable text scaling without hiding essential controls. Focus must move to a predictable location after changing investigation, opening a snapshot, or opening Help, and Escape must close temporary panels without resetting the run.
+
+Provide short, plain-language definitions before introducing technical terms, keep the observation sentence structure stable, and avoid flashing, timed disappearance, or fine motor requirements. These are release requirements, not optional polish.
+
+The Token snapshot provides discrete, labeled water and solute counters that can be reproduced on a desk, with arrows showing what changed. Use a configurable starter arrangement; 15 blue water and 10 yellow solute tokens is a proposed classroom preset pending confirmation, not a verified curriculum requirement. Display the represented compartment and a consistent within-snapshot token key. Clearly distinguish rounded token quantities from exact model values; never alter the scientific state to make the token counts convenient. Offer a printable or readily hand-copied compartment outline.
+
+**Reviewer rationale:** Matching manipulatives supports transfer, but small token counts are a teaching representation rather than a molecular ratio or sodium calibration. Arbitrary continuous model states cannot always map exactly to a fixed handful of counters.
+
+Provide optional sentence frames and a compact word bank:
+
+- “As water outside the cells increases, the concentration ___ because ___.”
+- “The outside is ___ relative to the cell, so net water movement is ___.”
+- “When the ADH signal ___, urine water output ___.”
+- “Run A and Run B differed in ___. My evidence is ___.”
+
+These are proposed frames; confirm exact curriculum language before labeling them New Visions quotations. Students may explain orally, point to a sequence, arrange manipulatives, draw, or write. Supports remain independently selectable; the 12:1:1 setting does not imply that every student needs the same display. Introduce one representation at a time rather than presenting graphs, tokens, particles, and completed flowcharts simultaneously.
+
+Suggested lesson: 3-minute prediction, 8-minute paired investigation, 5-minute comparison, and a short explanation. Students can work in pairs as operator and evidence recorder. Success means explaining a mechanism with evidence, not keeping the runner inside a colored band.
+
+## 9. Technical design and session data
+
+Use one dedicated Water Balance scene with a simulation controller, body-flow diagram, cell view, control panel, and graph panel. Keep equations in a typed, independently testable model; visuals read snapshots and never drive scientific state. Use signals for controls and observations, tabs for GDScript indentation, and configurable scenario resources.
+
+Reuse cell rendering only after checking its assumptions. The new model requires finite compartments and continuous outside concentration, so do not feed it through the original eleven-position concentration slider.
+
+Record graph samples every 0.25 model-time units, with the initial and final state included. Keep A/B records in session memory only; page refresh clears them. Changing settings during Free Explore records a timestamped event. No accounts, server, analytics, or permanent save are required.
+
+Include H, urine output, and model version in saved snapshots so comparisons and flowcharts use the actual recorded state. Medical-data cards store their source edition separately from generated runs. The presentation setting changes explanation visibility only, not model dynamics. Token mode pauses the shared clock. Any time acceleration runs additional fixed simulation steps rather than enlarging dt.
+
+Target smooth operation at 30 FPS or better on a representative school Chromebook. Cap decorative particles and avoid per-particle physics. Test browser resizing and keyboard controls on the actual exported build. Keep dependency choices and engine upgrades out of this design stage.
+
+## 10. Scope and build order
+
+### Required state and content contracts
+
+The interface must always make these states distinguishable: **ready/paused**, **running**, **paused with a snapshot open**, **finished at duration**, **stopped at model limit**, and **comparison view**. Each state has one primary next action (Run, Resume, Close snapshot, Restart/Compare, or Restart/Compare respectively). A model-limit message must include the reason in plain language and must not use clinical terms.
+
+Every evidence-bearing label must identify whether it is an exact model value, a rounded token representation, a qualitative trend, or curriculum evidence imported from a source. If a source cannot be verified for the selected teaching edition, show “source verification pending” and omit case values rather than filling the gap from memory.
+
+**First release:** Two-compartment model, separate water/solute bookkeeping, explicit delayed ADH feedback with signal meter and optional message animation, one nonrupturing cell, three activity settings, four drinking settings, five investigations, two graphs, A/B comparison, causal-flowchart view, token snapshot, sentence frames, tonicity vocabulary, sourced medical-data reference card, and Investigate/Explain settings.
+
+**Deferred:** Quantitatively calibrated sodium outputs, sports drinks, adjustable salts, detailed kidney anatomy and hormone pathways, temperature/humidity, individual differences, disease-state simulations, standalone fish simulation, persistent saves, downloadable datasets, red-blood-cell populations, and teacher dashboards. Time acceleration is a conditional first-release addition if pacing tests require it.
+
+Build sequence:
+
+1. Validate the numerical model and conservation ledgers without animation.
+2. Connect the body diagram, cell rendering, and pause/reset behavior.
+3. Add plots, saved comparisons, guided investigations, ADH signaling visuals, classroom representations, and sourced medical data.
+4. Tune scenario behavior, review biological explanations, and pilot the web build with students.
+
+## 11. Acceptance criteria
+
+- Closed-system tests conserve water and solute within numerical tolerance; open-system changes match cumulative inputs and outputs.
+- Equal concentrations produce no net cell-water transfer; a concentration difference produces the correct direction and an equal-and-opposite transfer.
+- Matched scenarios demonstrate both shrinking and swelling before model limits, using the same neutral starting state.
+- Automatic output changes in the expected direction, respects its limits, and differs visibly from fixed output after its lag.
+- ADH increases with higher concentration or lower outside water, and increased H reduces urine output; the meter, messages, records, and explanations agree with the model.
+- At least one guided comparison demonstrates compensation and another demonstrates persistent imbalance; neither requires students to reach a software boundary.
+- Tonicity labels reflect the current cell comparison and update as the cell adjusts.
+- The sodium reference card is sourced and distinct from generated generic-solute values; no arbitrary cell-volume range is labeled healthy.
+- Investigate withholds case conclusions and completed explanations while retaining vocabulary and accessibility supports; Explain reveals the intended interpretation.
+- Token snapshots conserve their represented quantities through illustrated transfers and disclose rounding; sentence frames leave causal reasoning to students.
+- Results are independent of rendering frame rate and repeatable for identical conditions.
+- Pause freezes all model and visual progression; restarting restores all live state and pending absorption while preserving A/B records.
+- Saved runs remain immutable, retain settings/events, and use consistent axes and labels.
+- No invalid values, negative stores, hidden material creation, or unlabelled display-limit behavior occur.
+- The exported interface fits a representative Chromebook and supports keyboard-only operation.
+- In a classroom pilot, students can use a comparison to explain the input → concentration → osmosis → size chain and name a model limitation. Record observed difficulties before setting a quantitative learning target.
+
+## 12. Sources and evidence boundaries
+
+- [New Visions Marathon Runner](https://www.newvisions.org/curriculum/science/biology/marathon-runner): curriculum context. The research report in this workspace identifies the accessible SY25–26 onion and kidney investigations; lesson placement should be checked against the teaching edition.
+- [New Visions Summer 2022 teacher materials](https://newvisions-uploads-production.s3.amazonaws.com/bio_U1/BIO%20%7C%20U1%20%7C%20Marathon%20Runner%20%7C%20Teacher%20Materials%20%7C%20Summer%202022.pdf): explicitly supplies the 135–145 mEq/L plasma sodium reference. Confirm against the classroom edition before importing case data or exact activity wording.
+- [NGSS: HS Structure and Function](https://www.nextgenscience.org/topic-arrangement/hsstructure-and-function): HS-LS1-3 investigation and feedback expectations, including its assessment boundary.
+- [MedlinePlus: Low blood sodium](https://medlineplus.gov/ency/article/000394.htm): hyponatremia concerns sodium concentration and can arise through multiple water/sodium balance patterns; clinical reference intervals may vary.
+- [NIDDK: Your Kidneys & How They Work](https://www.niddk.nih.gov/health-information/kidney-disease/kidneys-how-they-work): kidneys regulate water and dissolved substances; urine formation involves filtration and reabsorption.
+- [NIDDK: Diabetes Insipidus](https://www.niddk.nih.gov/health-information/kidney-disease/diabetes-insipidus): vasopressin supports kidney water conservation; this informs the qualitative feedback concept, not a disease simulation.
+- [Sodium ion concentration vs. sweat rate relationship in humans](https://pubmed.ncbi.nlm.nih.gov/17600161/): sweat composition varies with conditions; the constant fraction here is deliberately simplified.
+
+All equations, coefficients, interface decisions, and scenario defaults above are proposed educational design choices. They are not parameters supplied or endorsed by New Visions or the physiology sources.

@@ -41,6 +41,14 @@ The instructional emphasis is systems, cause and effect, and interpreting models
 
 **Reviewer rationale:** Hitting an endpoint does not demonstrate HS-LS1-3; investigating both successful compensation and persistent imbalance provides stronger evidence of understanding.
 
+### Evidence of learning
+
+Use a comparison record as the suggested lesson product: identify the changed condition, select two observations or graph features, explain the causal connection, and name one model limitation. Predictions remain optional and ungraded. Students may demonstrate their reasoning by speaking, writing, drawing, arranging tokens, or selecting and explaining labeled phrases. These responses may be recorded on paper or observed by the teacher; this requirement does not add an in-app response-storage system.
+
+Teacher checks should match the investigation: distinguish amount from concentration and infer net water movement from current concentrations; in feedback investigations, use ADH and urine output as evidence; in the runner explanation, connect the separate medical data to the model while recognizing its limits. No automated grade or mastery inference is required.
+
+**Manus review rationale:** Keep explicit evidence and multiple response formats, but do not make prediction mandatory or assess every objective in every investigation; both would conflict with the existing optional-prediction and focused-investigation design.
+
 ## 3. Student experience
 
 1. **Choose an investigation.** Read one short question and inspect the starting state.
@@ -56,6 +64,12 @@ Every investigation is available immediately. Free Explore permits live control 
 Provide teacher-selected **Investigate** and **Explain** presentation settings. Investigate is the default: observations, data, vocabulary definitions, and incomplete sentence frames are available, but the interface does not diagnose the runner or automatically complete causal links. Explain adds worked causal chains and the hyponatremia interpretation after students have reasoned from evidence. These are instructional settings, not secured assessment modes.
 
 **Reviewer rationale:** An automatic “Hyponatremia reached” message would supply an inference students may still be expected to make; teachers can reveal terminology and explanations when appropriate to their assessment goal.
+
+Show the active Investigate/Explain setting in Help and teacher launch instructions. Switching settings changes explanation visibility only; it never resets a run or changes model behavior.
+
+Before a guided run, show what changes between runs, what stays fixed, the kidney-response condition, and which evidence to collect. Keep model controls fixed throughout a started guided run, including while paused. Pause, Restart, view selection, and accessibility supports remain available. Mark Free Explore control changes as timestamped events on the trace.
+
+**Manus review rationale:** Keep the comparison instructions, but retain fixed guided model controls rather than allowing unspecified exceptions; live changes would make the intended one-variable comparison harder to interpret.
 
 ## 4. Screen and visual design
 
@@ -225,6 +239,18 @@ These are proposed frames; confirm exact curriculum language before labeling the
 
 Suggested lesson: 3-minute prediction, 8-minute paired investigation, 5-minute comparison, and a short explanation. Students can work in pairs as operator and evidence recorder. Success means explaining a mechanism with evidence, not keeping the runner inside a colored band.
 
+### Accessibility interaction requirements
+
+Offer investigation choice, optional prediction, pair roles, and penalty-free restarting; provide multiple representations and response formats without assigning supports by diagnosis. Students and teachers can independently select supports. Keep the same learning goal across oral, written, drawn, and token-based explanations.
+
+Use text, shape, line style, or position alongside color for meaningful distinctions. During implementation, specify measurable contrast targets and record verification. Test browser zoom and text scaling at documented settings without losing access to essential controls. Use stable observation sentence structures, short definitions available before or alongside technical terms, and no flashing, timed-disappearing instructions, or precision dragging as the only way to perform an essential action.
+
+After changing investigation, focus moves to its heading or first relevant control. Opening Help or a token panel moves focus into that panel; Escape closes it and returns focus to its launcher without resetting the run. Closing a token panel leaves the run paused until the student explicitly resumes.
+
+Verify that accessible interaction exposes the run state, controls and values, model time, outside-concentration and cell-volume trends, ADH and urine-output trends, endpoint reason, and A/B labels. If the exported interface cannot expose essential tasks and observations accessibly, provide an equivalent accessible interface before release. Report findings by task, not as one overall accessibility label.
+
+**Manus review rationale:** Keep the required accessible information and interactions, but do not mandate a duplicate non-canvas interface before testing the export; the requirement is usable access, with an equivalent interface required when the primary interface cannot provide it. An unspecified “project contrast target” is not a verifiable acceptance criterion, so targets must be defined and tested during implementation.
+
 ## 9. Technical design and session data
 
 Use one dedicated Water Balance scene with a simulation controller, body-flow diagram, cell view, control panel, and graph panel. Keep equations in a typed, independently testable model; visuals read snapshots and never drive scientific state. Use signals for controls and observations, tabs for GDScript indentation, and configurable scenario resources.
@@ -236,6 +262,14 @@ Record graph samples every 0.25 model-time units, with the initial and final sta
 Include H, urine output, and model version in saved snapshots so comparisons and flowcharts use the actual recorded state. Medical-data cards store their source edition separately from generated runs. The presentation setting changes explanation visibility only, not model dynamics. Token mode pauses the shared clock. Any time acceleration runs additional fixed simulation steps rather than enlarging dt.
 
 Target smooth operation at 30 FPS or better on a representative school Chromebook. Cap decorative particles and avoid per-particle physics. Test browser resizing and keyboard controls on the actual exported build. Keep dependency choices and engine upgrades out of this design stage.
+
+### State and evidence presentation
+
+Distinguish ready, running, paused, finished at duration, and stopped at a model limit. Treat graph comparison, Help, and token snapshots as presentation views layered over the run lifecycle, not mutually exclusive simulation states. Token snapshots pause the run. Expose appropriate next actions: Run when ready, Pause while running, Resume while paused, Close for a temporary panel, and Restart or Compare after completion or a model limit. A model-limit message gives the reason in plain language without clinical labels.
+
+Identify model values, rounded token representations, qualitative trends, and sourced curriculum evidence through panel headings, legends, and units. Source metadata records edition and verification status; unverified case values are omitted. Keep unresolved source verification visible in development/teacher review and use the supported printed-data workflow where appropriate.
+
+**Manus review rationale:** Separate lifecycle from views because a comparison or snapshot may be open while a run is paused or finished. Use “model value,” not “exact model value,” because numerical integration and sampled observations are approximations; shared labels avoid repeating qualifiers beside every number.
 
 ## 10. Scope and build order
 

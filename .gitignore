@@ -1,0 +1,4 @@
+.godot/
+*.log
+water_balance/tests/reports/
+

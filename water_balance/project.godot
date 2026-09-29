@@ -1,0 +1,11 @@
+; Numerical validation harness only; not the classroom application's host project.
+config_version=5
+
+[application]
+config/name="Water Balance — Numerical Validation"
+config/features=PackedStringArray("4.5", "GL Compatibility")
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
