@@ -14,20 +14,28 @@ extends Resource
 @export var sweat_fraction: float = 0.3
 @export var urine_fraction: float = 0.2
 @export var k: float = 0.08
-@export var g_c: float = 2.0
+# ADH falls to about half within ~3.5% dilution, so healthy kidneys clear a moderate surplus (0.3.0).
+@export var g_c: float = 14.0
 @export var g_w: float = 0.5
 @export var tau_h: float = 5.0
 @export var u_min: float = 0.0002
 @export var u_base: float = 0.001
 @export var u_max: float = 0.012
-@export var drinking_rates: Array[float] = [0.0, 0.003, 0.009, 0.030]
-@export var sweat_rates: Array[float] = [0.0, 0.004, 0.008]
+# Tuned 2026-10-10 (0.3.0) so 140 x outside concentration (the screen's illustrative mEq/L) ends a race near
+# Walk 146 / 139 / 135 / 116, Jog 155 / 143 / 137 / 121, Run 164 / 151 / 139 / 127 for None / Little / Medium /
+# Lots of water. Lots is more than sweat plus the kidneys' maximum can remove, so ADH reaches zero and the
+# blood still dilutes. Activities are Walk / Jog / Run.
+@export var drinking_rates: Array[float] = [0.0, 0.003, 0.007, 0.018]
+@export var sweat_rates: Array[float] = [0.002, 0.005, 0.008]
+# Solute per unit of drink water, relative to the starting outside concentration: water, sports drink.
+# A sports drink carries roughly 20 mEq/L sodium against about 140 in plasma, so about 0.15.
+@export var drink_solute: Array[float] = [0.0, 0.15]
 @export var min_water_fraction: float = 0.25
 @export var min_concentration: float = 0.5
 @export var max_concentration: float = 1.5
 @export var min_volume_ratio: float = 0.65
 @export var max_volume_ratio: float = 1.4
-@export var model_version: String = "water-balance-0.1.0-provisional"
+@export var model_version: String = "water-balance-0.3.0-provisional"
 
 # === PUBLIC METHODS ===
 func to_dictionary() -> Dictionary:
@@ -55,6 +63,11 @@ func validate() -> PackedStringArray:
 		errors.append("Output solute fractions must be between zero and one")
 	if drinking_rates.size() != 4 or sweat_rates.size() != 3:
 		errors.append("Expected four drinking rates and three sweat rates")
+	if drink_solute.is_empty():
+		errors.append("Expected at least one drink type")
+	for amount: float in drink_solute:
+		if not is_finite(amount) or amount < 0.0:
+			errors.append("Drink solute amounts must be finite and nonnegative")
 	for rates: Array[float] in [drinking_rates, sweat_rates]:
 		for rate: float in rates:
 			if not is_finite(rate) or rate < 0.0:

@@ -22,6 +22,7 @@ var _state: Dictionary = {}
 var _activity: int = 0
 var _drinking: int = 0
 var _automatic: bool = true
+var _drink_type: int = 0
 
 # === LIFECYCLE METHODS ===
 func _init(parameters: Parameters = null) -> void:
@@ -37,16 +38,19 @@ func reset() -> void:
 		"time": 0.0, "w_out": _params.initial_w_out, "s_out": _params.initial_s_out,
 		"w_in": _params.initial_w_in, "s_in": _params.initial_s_in,
 		"h": _base_h(), "urine_rate": _params.u_base, "endpoint": "",
-		"pending_water": 0.0, "consumed_water": 0.0, "absorbed_water": 0.0,
+		"pending_water": 0.0, "consumed_water": 0.0, "absorbed_water": 0.0, "absorbed_solute": 0.0,
 		"sweat_water": 0.0, "sweat_solute": 0.0, "urine_water": 0.0, "urine_solute": 0.0,
 	}
 
-func set_controls(activity: int, drinking: int, automatic: bool = true) -> bool:
+func set_controls(activity: int, drinking: int, automatic: bool = true, drink_type: int = 0) -> bool:
 	if activity < 0 or activity >= _params.sweat_rates.size() or drinking < 0 or drinking >= _params.drinking_rates.size():
+		return false
+	if drink_type < 0 or drink_type >= _params.drink_solute.size():
 		return false
 	_activity = activity
 	_drinking = drinking
 	_automatic = automatic
+	_drink_type = drink_type
 	return true
 
 func step() -> Dictionary:
@@ -105,6 +109,7 @@ func snapshot() -> Dictionary:
 	result.activity = _activity
 	result.drinking = _drinking
 	result.automatic = _automatic
+	result.drink_type = _drink_type
 	result.model_version = _params.model_version
 	return result
 
@@ -113,7 +118,7 @@ func conservation_errors() -> Dictionary:
 		return {}
 	return {
 		"water": float(_state.w_out) + float(_state.w_in) - (_params.initial_w_out + _params.initial_w_in + float(_state.absorbed_water) - float(_state.sweat_water) - float(_state.urine_water)),
-		"solute": float(_state.s_out) + float(_state.s_in) - (_params.initial_s_out + _params.initial_s_in - float(_state.sweat_solute) - float(_state.urine_solute)),
+		"solute": float(_state.s_out) + float(_state.s_in) - (_params.initial_s_out + _params.initial_s_in + float(_state.absorbed_solute) - float(_state.sweat_solute) - float(_state.urine_solute)),
 		"absorption": float(_state.consumed_water) - float(_state.absorbed_water) - float(_state.pending_water),
 	}
 
@@ -145,6 +150,10 @@ func _advance(previous: Dictionary, interval: float) -> Dictionary:
 	next.consumed_water += consumed
 	next.absorbed_water += absorbed
 	next.w_out += absorbed
+	# A drink's solute is absorbed with its water (at the drink type in force now).
+	var solute_in: float = absorbed * _params.drink_solute[_drink_type] * _params.initial_s_out / _params.initial_w_out
+	next.absorbed_solute += solute_in
+	next.s_out += solute_in
 	# Check each split stage so a later transfer cannot hide an earlier limit.
 	if _stop_at_stage_boundary(next):
 		return next

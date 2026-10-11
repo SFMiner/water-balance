@@ -2,7 +2,7 @@
 
 Based on **The Runner’s Water Balance — version 1.1.md**. Prepared September 29, 2026.
 
-**Implementation status (September 29):** Project `AGENTS.md`, isolated numerical harness, model, and validation runner are implemented. The model passes 139 checks across 24 standard scenarios in Godot 4.5. Phase 0 host integration and Phase 1 scenario/step-refinement validation remain open; see `VALIDATION_STATUS.md`. Later phases have not begun.
+**Implementation status (September 29):** Project `CLAUDE.md`, isolated numerical harness, model, and validation runner are implemented. The model passes 139 checks across 24 standard scenarios in Godot 4.5. Phase 0 host integration and Phase 1 scenario/step-refinement validation remain open; see `VALIDATION_STATUS.md`. Later phases have not begun.
 
 ## Outcome and scope
 

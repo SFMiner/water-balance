@@ -31,6 +31,8 @@ func _closed_parameters() -> Resource:
 	var parameters: Resource = Parameters.new()
 	parameters.u_min = 0.0
 	parameters.u_base = 0.0
+	# Since model 0.2.0 the slowest activity (Walk) sweats; a closed system needs no sweat at all
+	parameters.sweat_rates[0] = 0.0
 	return parameters
 
 func _test_equilibrium_and_direction() -> void:
@@ -156,7 +158,7 @@ func _test_configuration_ownership_and_overflow() -> void:
 	var model: RefCounted = Model.new(parameters)
 	parameters.initial_w_in = 100.0
 	parameters.drinking_rates[3] = 200.0
-	_check(model.params.initial_w_in == 2.0 and model.params.drinking_rates[3] == 0.030, "Run owns an independent parameter snapshot")
+	_check(model.params.initial_w_in == 2.0 and model.params.drinking_rates[3] == 0.018, "Run owns an independent parameter snapshot")
 	var exposed: Resource = model.params
 	exposed.initial_w_in = 0.0
 	_check(model.snapshot().volume_ratio == 1.0, "Parameter accessor cannot corrupt live derived quantities")
