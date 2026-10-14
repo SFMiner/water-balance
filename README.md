@@ -35,7 +35,8 @@ sims.mr-miner.com (decided 2026-10-10), not a mode of the osmosis simulation.
 - [x] Small frames and phones: text stays >= 85% size, the panels wrap and the page scrolls
 - [x] Web export (2D lean template): `..\exports\water-balance\`, checked in headless Chromium (7 checks)
 - [ ] Classroom try-out on Chromebooks
-- [ ] Put on sims.mr-miner.com (hidden first)
+- [x] Put on sims.mr-miner.com (published 2026-10-14; also sfminer.github.io/water-balance)
+- [x] Teacher guide and student worksheet (`docs/`, built by `docs/make_worksheet.py`)
 
 Not included (from the full design, `The Runner's Water Balance — version 1.1.md`): guided investigations,
 A/B pairs beyond one kept run, causal flowchart, token snapshot, sentence frames, Investigate/Explain settings.
