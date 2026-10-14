@@ -13,6 +13,7 @@ const SALT_EDGE: Color = Color(0.25, 0.2, 0.05)
 const ADH: Color = Color(0.75, 0.5, 1.0)
 const INK: Color = Color(0.88, 0.92, 0.96)
 const DIM: Color = Color(0.6, 0.68, 0.76)
+const COLLAPSED: Color = Color(1.0, 0.55, 0.45)
 const BLOOD_RECT: Rect2 = Rect2(200.0, 150.0, 230.0, 160.0)
 ## Salt diamonds drawn per unit of outside solute (the starting blood has 1 unit).
 const SALT_PER_UNIT: float = 22.0
@@ -24,7 +25,7 @@ var drink_type: int = 0
 var sweat_rate: float = 0.0
 var pace: int = 0
 var max_urine_rate: float = 0.012
-var max_drink_rate: float = 0.018
+var max_drink_rate: float = 0.021
 
 # === PRIVATE VARIABLES ===
 var _font: Font
@@ -102,9 +103,10 @@ func _draw() -> void:
 
 
 func _draw_runner() -> void:
-	# A simple runner; legs swing faster at a faster pace
+	# A simple runner: legs swing while running (pace 1) and stand still when stopped (pace 0)
 	var t: float = float(snapshot.get("time", 0.0))
-	var swing: float = sin(t * (2.0 + 2.0 * float(pace))) * (0.35 + 0.15 * float(pace))
+	var collapsed: bool = String(snapshot.get("endpoint", "")).begins_with("collapse_")
+	var swing: float = sin(t * 6.0) * 0.65 if pace > 0 and not collapsed else 0.0
 	var hip: Vector2 = Vector2(95.0, 205.0)
 	var neck: Vector2 = Vector2(100.0, 120.0)
 	draw_circle(Vector2(103.0, 95.0), 22.0, INK)
@@ -116,7 +118,8 @@ func _draw_runner() -> void:
 		var elbow: Vector2 = neck + Vector2(10.0, 8.0) + Vector2(-sin(s) * 30.0, cos(s) * 30.0)
 		draw_line(neck + Vector2(0, 8), elbow, INK, 7.0)
 		draw_line(elbow, elbow + Vector2(18.0, -16.0), INK, 6.0)
-	_text(Vector2(20.0, 345.0), "Runner", 16, INK, 150.0, HORIZONTAL_ALIGNMENT_CENTER)
+	var label: String = "Runner (collapsed)" if collapsed else ("Runner (running)" if pace > 0 else "Runner (stopped)")
+	_text(Vector2(20.0, 345.0), label, 16, COLLAPSED if collapsed else INK, 150.0, HORIZONTAL_ALIGNMENT_CENTER)
 
 
 func _draw_drink() -> void:

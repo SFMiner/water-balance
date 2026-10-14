@@ -31,7 +31,7 @@ func _closed_parameters() -> Resource:
 	var parameters: Resource = Parameters.new()
 	parameters.u_min = 0.0
 	parameters.u_base = 0.0
-	# Since model 0.2.0 the slowest activity (Walk) sweats; a closed system needs no sweat at all
+	# Since model 0.2.0 the slowest activity (now Stop) sweats; a closed system needs no sweat at all
 	parameters.sweat_rates[0] = 0.0
 	return parameters
 
@@ -67,15 +67,28 @@ func _test_feedback() -> void:
 		_check(after.urine_rate < before.urine_rate if solute > 1.0 else after.urine_rate > before.urine_rate, "ADH and urine move oppositely")
 		_check(absf(after.h - before.h) < 0.01, "ADH is delayed, not an instantaneous jump")
 	var fixed: RefCounted = Model.new()
-	fixed.set_controls(2, 0, false)
+	fixed.set_controls(1, 0, false)
 	for index: int in range(100):
 		fixed.step()
 	_check(absf(fixed.snapshot().urine_rate - fixed.params.u_base) < TOLERANCE, "Fixed mode holds output")
 	_check(fixed.snapshot().h > baseline.snapshot().h, "ADH may respond while output is fixed")
+	# Kidneys save salt when the blood is dilute: Run + Lots of water keeps more blood than without salt saving
+	var no_saving: Resource = Parameters.new()
+	no_saving.urine_salt_gain = 0.0
+	var ends: Array[Dictionary] = []
+	for parameters: Resource in [Parameters.new(), no_saving]:
+		var run: RefCounted = Model.new(parameters)
+		run.set_controls(1, 2, true)
+		var snap: Dictionary = run.snapshot()
+		while String(snap.endpoint).is_empty():
+			snap = run.step()
+		ends.append(snap)
+	_check(ends[0].urine_solute < 0.5 * ends[1].urine_solute, "Dilute blood: kidneys save salt")
+	_check(ends[0].w_out > ends[1].w_out + 0.05 and ends[0].c_out < 135.0 / 140.0, "Salt saving keeps blood volume; Lots still dilutes")
 
 func _test_absorption_reset_and_copy() -> void:
 	var model: RefCounted = Model.new()
-	model.set_controls(0, 3, true)
+	model.set_controls(0, 2, true)
 	var initial: Dictionary = model.snapshot()
 	var result: Dictionary = model.step()
 	_check(result.pending_water > 0.0 and result.absorbed_water > 0.0, "Intake begins gradual absorption")
@@ -93,7 +106,7 @@ func _test_absorption_reset_and_copy() -> void:
 	_check(reset_state.time == 0.0 and reset_state.pending_water == 0.0, "Reset clears time and pending absorption")
 	_check(reset_state.consumed_water == 0.0 and reset_state.sweat_water == 0.0, "Reset clears ledgers")
 	_check(not model.set_controls(-1, 0, true), "Invalid activity is rejected")
-	_check(not model.set_controls(0, 4, true), "Invalid drinking selection is rejected")
+	_check(not model.set_controls(0, 3, true), "Invalid drinking selection is rejected")
 	var invalid: Resource = Parameters.new()
 	invalid.tau_h = 0.0
 	_check(not invalid.validate().is_empty(), "Nonpositive lag is invalid")
@@ -111,9 +124,9 @@ func _test_limits_and_duration() -> void:
 	_check(terminal.endpoint == "duration", "Duration endpoint is recorded")
 	_check(short_run.step() == terminal, "Terminal step cannot advance the model")
 	var fast_parameters: Resource = Parameters.new()
-	fast_parameters.sweat_rates.assign([0.0, 0.004, 100.0])
+	fast_parameters.sweat_rates.assign([0.0, 100.0])
 	var fast_run: RefCounted = Model.new(fast_parameters)
-	fast_run.set_controls(2, 0, true)
+	fast_run.set_controls(1, 0, true)
 	var stopped: Dictionary = fast_run.step()
 	_check(not stopped.endpoint.is_empty(), "Excessive output reaches a domain boundary")
 	_check(stopped.time < fast_parameters.dt, "Boundary is localized inside the integration step")
@@ -122,8 +135,8 @@ func _test_limits_and_duration() -> void:
 	_check(absf(errors.water) < TOLERANCE and absf(errors.solute) < TOLERANCE, "Boundary localization conserves quantities")
 
 func _sweep_scenarios() -> void:
-	for activity: int in range(3):
-		for drinking: int in range(4):
+	for activity: int in range(2):
+		for drinking: int in range(3):
 			for automatic: bool in [true, false]:
 				var model: RefCounted = Model.new()
 				var replay: RefCounted = Model.new()
@@ -157,8 +170,8 @@ func _test_configuration_ownership_and_overflow() -> void:
 	var parameters: Resource = Parameters.new()
 	var model: RefCounted = Model.new(parameters)
 	parameters.initial_w_in = 100.0
-	parameters.drinking_rates[3] = 200.0
-	_check(model.params.initial_w_in == 2.0 and model.params.drinking_rates[3] == 0.018, "Run owns an independent parameter snapshot")
+	parameters.drinking_rates[2] = 200.0
+	_check(model.params.initial_w_in == 2.0 and model.params.drinking_rates[2] == 0.021, "Run owns an independent parameter snapshot")
 	var exposed: Resource = model.params
 	exposed.initial_w_in = 0.0
 	_check(model.snapshot().volume_ratio == 1.0, "Parameter accessor cannot corrupt live derived quantities")
@@ -166,9 +179,9 @@ func _test_configuration_ownership_and_overflow() -> void:
 	exposed_state.w_in = -100.0
 	_check(model.snapshot().w_in == 2.0, "State accessor cannot corrupt the model")
 	var extreme: Resource = Parameters.new()
-	extreme.drinking_rates[3] = 1e308
+	extreme.drinking_rates[2] = 1e308
 	var overflow: RefCounted = Model.new(extreme)
-	overflow.set_controls(0, 3, true)
+	overflow.set_controls(0, 2, true)
 	var before: Dictionary = overflow.snapshot()
 	var after: Dictionary = overflow.step()
 	_check(after.endpoint == "numerical_error", "Arithmetic overflow reports numerical failure")

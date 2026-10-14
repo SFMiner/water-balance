@@ -8,6 +8,8 @@ const Model = preload("../model/water_balance_model.gd")
 const STEP: float = 0.02
 const SAMPLE_INTERVAL: float = 0.25
 const EPSILON: float = 0.000000001
+## Model time per race hour: the default 60-unit run is a 4-hour race.
+const MODEL_TIME_PER_HOUR: float = 15.0
 
 var run_state: String = "ready"
 var guided: bool = false
@@ -15,6 +17,7 @@ var activity: int = 0
 var drinking: int = 0
 var automatic: bool = true
 var drink_type: int = 0
+var race_hours: float = 4.0
 var prediction: String = ""
 var samples: Array[Dictionary] = []
 var events: Array[Dictionary] = []
@@ -84,6 +87,21 @@ func configure(next_activity: int, next_drinking: int, next_automatic: bool, nex
 		samples[0] = _current.duplicate(true)
 	snapshot_updated.emit(snapshot())
 	return true
+
+## Changes the race length. A started race keeps going if the new end is still ahead; otherwise (or after
+## the finish) a fresh race starts with the new length.
+func set_race_hours(hours: float) -> bool:
+	if (guided and _started) or not _model.set_duration(hours * MODEL_TIME_PER_HOUR):
+		return false
+	race_hours = hours
+	if run_state == "finished" or float(_current.time) >= duration() - EPSILON:
+		restart()
+	else:
+		snapshot_updated.emit(snapshot())
+	return true
+
+func duration() -> float:
+	return race_hours * MODEL_TIME_PER_HOUR
 
 func set_guided_mode(value: bool) -> void:
 	if run_state == "ready":

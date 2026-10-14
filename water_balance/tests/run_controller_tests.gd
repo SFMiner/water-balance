@@ -22,7 +22,7 @@ func _test_lifecycle() -> void:
 	var controller: Node = Controller.new()
 	_check(controller.samples.size() == 1 and controller.snapshot().time == 0.0, "Initial sample")
 	_check(not controller.keep_run("A"), "Cannot keep unstarted run")
-	_check(controller.configure(2, 1, false), "Valid settings")
+	_check(controller.configure(1, 1, false), "Valid settings")
 	controller.prediction = "Cells shrink"
 	controller.start()
 	controller.advance(0.26)
@@ -78,8 +78,8 @@ func _test_guided() -> void:
 func _test_frame_rates() -> void:
 	var slow: Node = Controller.new()
 	var fast: Node = Controller.new()
-	slow.configure(2, 0, true)
-	fast.configure(2, 0, true)
+	slow.configure(1, 0, true)
+	fast.configure(1, 0, true)
 	slow.start()
 	fast.start()
 	for index: int in range(1800):
@@ -101,7 +101,7 @@ func _test_boundary() -> void:
 	parameters.min_concentration = 0.99
 	controller.set("_model", preload("../model/water_balance_model.gd").new(parameters))
 	controller.restart()
-	controller.configure(0, 3, false)
+	controller.configure(0, 2, false)
 	controller.start()
 	controller.advance(60.0)
 	_check(controller.run_state == "finished" and controller.snapshot().endpoint != "duration", "Model limit terminal")

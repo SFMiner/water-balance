@@ -53,6 +53,13 @@ func set_controls(activity: int, drinking: int, automatic: bool = true, drink_ty
 	_drink_type = drink_type
 	return true
 
+## Race length in model time. Rates are unchanged; a longer race only runs the same model for longer.
+func set_duration(value: float) -> bool:
+	if not is_finite(value) or value <= 0.0:
+		return false
+	_params.duration = value
+	return true
+
 func step() -> Dictionary:
 	if _state.is_empty() or not String(_state.endpoint).is_empty():
 		return snapshot()
@@ -170,7 +177,8 @@ func _advance(previous: Dictionary, interval: float) -> Dictionary:
 	next.urine_rate = _params.u_min + (_params.u_max - _params.u_min) * (1.0 - float(next.h)) if _automatic else _params.u_base
 	if _stop_at_stage_boundary(next):
 		return next
-	_remove_output(next, float(next.urine_rate) * interval, _params.urine_fraction, "urine")
+	var urine_salt_share: float = clampf(1.0 + _params.urine_salt_gain * (_concentration(next.s_out, next.w_out) - 1.0), 0.0, 1.0)
+	_remove_output(next, float(next.urine_rate) * interval, _params.urine_fraction * urine_salt_share, "urine")
 	if _stop_at_stage_boundary(next):
 		return next
 	_apply_osmosis(next, interval)
@@ -236,4 +244,13 @@ func _boundary(candidate: Dictionary) -> String:
 		return "volume_minimum"
 	if volume >= _params.max_volume_ratio:
 		return "volume_maximum"
+	# The runner collapses: classroom stops, checked after the software limits above (which lie further out)
+	if float(candidate.w_out) <= _params.initial_w_out * _params.collapse_min_blood_water:
+		return "collapse_low_blood_water"
+	if float(candidate.w_out) >= _params.initial_w_out * _params.collapse_max_blood_water:
+		return "collapse_high_blood_water"
+	if outside <= _params.collapse_min_concentration * _params.initial_s_out / _params.initial_w_out:
+		return "collapse_low_sodium"
+	if outside >= _params.collapse_max_concentration * _params.initial_s_out / _params.initial_w_out:
+		return "collapse_high_sodium"
 	return ""

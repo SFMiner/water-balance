@@ -8,8 +8,9 @@ extends Control
 const START_MEQ: float = 140.0
 const NORMAL_LOW: float = 135.0
 const NORMAL_HIGH: float = 145.0
-const SCALE_MIN: float = 110.0
-const SCALE_MAX: float = 170.0
+## Covers the collapse stops (110 and 170 mEq/L in model 0.5.0) with a margin.
+const SCALE_MIN: float = 100.0
+const SCALE_MAX: float = 180.0
 const INK: Color = Color(0.88, 0.92, 0.96)
 const BAND: Color = Color(0.35, 0.85, 0.45, 0.35)
 
@@ -55,7 +56,7 @@ func _draw() -> void:
 	draw_rect(bar, Color(0.12, 0.18, 0.26))
 	draw_rect(Rect2(_x(NORMAL_LOW, bar), bar.position.y, _x(NORMAL_HIGH, bar) - _x(NORMAL_LOW, bar), bar.size.y), BAND)
 	draw_rect(bar, INK, false, 1.0)
-	for tick: float in [110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0]:
+	for tick: float in [100.0, 120.0, 140.0, 160.0, 180.0]:
 		var x: float = _x(tick, bar)
 		draw_line(Vector2(x, bar.end.y), Vector2(x, bar.end.y + 4.0), INK, 1.0)
 		draw_string(_font, Vector2(x - 15.0, bar.end.y + 17.0), "%d" % int(tick), HORIZONTAL_ALIGNMENT_CENTER, 30.0, 11, INK)

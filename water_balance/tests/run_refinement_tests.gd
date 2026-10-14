@@ -14,7 +14,7 @@ var refinements: Array[Dictionary] = []
 var probes: Array[Dictionary] = []
 
 func _initialize() -> void:
-	for drinking: int in [0, 2, 3]:
+	for drinking: int in [0, 1, 2]:
 		var runs: Array[Dictionary] = []
 		for interval: float in [0.02, 0.01, 0.005]:
 			runs.append(_run(drinking, interval))
@@ -33,16 +33,16 @@ func _initialize() -> void:
 			_check(absf(float(run.endpoint.time) - float(reference.endpoint.time)) <= ENDPOINT_TIME_TOLERANCE, "Matching endpoint time within one default step")
 			run.endpoint_differences_from_finest = differences
 			run.max_trace_difference_from_finest = max_trace_difference
-		refinements.append({"activity": 2, "drinking": drinking, "automatic": true, "runs": runs})
+		refinements.append({"activity": 1, "drinking": drinking, "automatic": true, "runs": runs})
 	for index: int in range(13):
 		var rate: float = 0.005 + float(index) * 0.00025
-		var run: Dictionary = _run(2, 0.02, rate)
+		var run: Dictionary = _run(1, 0.02, rate)
 		run.compensation_evidence = _compensation(run)
 		probes.append(run)
 	# Narrow the observed transition between too little recovery (.00575) and
 	# continuing late drift (.00600); retain the original broad sweep as evidence.
 	for rate: float in [0.0058, 0.00585, 0.0059, 0.00595]:
-		var run: Dictionary = _run(2, 0.02, rate)
+		var run: Dictionary = _run(1, 0.02, rate)
 		run.compensation_evidence = _compensation(run)
 		probes.append(run)
 	_write_report()
@@ -63,9 +63,9 @@ func _run(drinking: int, interval: float, replacement_rate: float = -1.0) -> Dic
 	parameters.dt = interval
 	if replacement_rate >= 0.0:
 		# Exploratory parameters exist only in this run; the source defaults stay intact.
-		parameters.drinking_rates[2] = replacement_rate
+		parameters.drinking_rates[drinking] = replacement_rate
 	var model: RefCounted = Model.new(parameters)
-	model.set_controls(2, drinking, true)
+	model.set_controls(1, drinking, true)
 	var trace: Array[Dictionary] = [model.snapshot()]
 	var peak_error: float = 0.0
 	var peak_time: float = 0.0
