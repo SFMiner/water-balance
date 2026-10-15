@@ -160,8 +160,8 @@ def teacher_guide(doc):
 		"(more urine).", "ADH meter (purple):")
 	bullet(doc, " one sentence describing what is happening right now: is the blood saltier or more diluted, "
 		"is water moving into or out of the cells, and what ADH and the kidneys are doing.", "The observation line:")
-	bullet(doc, " how much water and salt has gone in (Drunk), out (Sweat, Urine), and how much is in the blood now. "
-		"Every number is a percentage of what the blood held at the start, so 100% = no change.", "Water and salt so far (right):")
+	bullet(doc, " how much water and salt has gone in (Drunk) and out (Sweat, Urine) since the start. "
+		"Every number is a percentage of what the blood held at the start, so 100% = as much as the blood started with.", "Water and salt so far (right):")
 	bullet(doc, " salt ÷ water, turned into the mEq/L units on the Medical Tent Data. The green band is the normal "
 		"range, 135–145 mEq/L.", "Blood saltiness, gauge and graph:")
 

@@ -23,7 +23,7 @@ const WATER_TEXT: Color = Color(0.5, 0.75, 1.0)
 const SALT_TEXT: Color = Color(1.0, 0.85, 0.35)
 const DIM_TEXT: Color = Color(0.6, 0.68, 0.76)
 ## Columns of the water and salt tally: percentages of the water and salt the blood held at the start.
-const TALLY_COLUMNS: Array[String] = ["", "Drunk", "Sweat", "Urine", "Blood now"]
+const TALLY_COLUMNS: Array[String] = ["", "Drunk", "Sweat", "Urine"]
 ## Net water flow into or out of cells shows only past this concentration difference.
 const FLOW_TOLERANCE: float = 0.002
 ## What the observation says when the runner collapses (the model's collapse stops, chosen for the classroom).
@@ -49,7 +49,7 @@ var clear_button: Button
 var body: BodyView
 var gauge: SodiumGauge
 var sodium_graph: RaceGraph
-## Tally values: [row][column - 1], rows water then salt; columns drunk, sweat, urine, blood now.
+## Tally values: [row][column - 1], rows water then salt; columns drunk, sweat, urine.
 var tally_cells: Array[Array] = []
 var saltiness: Label
 
@@ -217,16 +217,14 @@ func _net_water(snap: Dictionary) -> String:
 ## blood, because sweat carries out even more water.
 func _show_tally(snap: Dictionary) -> void:
 	var rows: Array[Array] = [
-		[float(snap.get("absorbed_water", 0.0)), float(snap.get("sweat_water", 0.0)), float(snap.get("urine_water", 0.0)), float(snap.get("w_out", 1.0))],
-		[float(snap.get("absorbed_solute", 0.0)), float(snap.get("sweat_solute", 0.0)), float(snap.get("urine_solute", 0.0)), float(snap.get("s_out", 1.0))],
+		[float(snap.get("absorbed_water", 0.0)), float(snap.get("sweat_water", 0.0)), float(snap.get("urine_water", 0.0))],
+		[float(snap.get("absorbed_solute", 0.0)), float(snap.get("sweat_solute", 0.0)), float(snap.get("urine_solute", 0.0))],
 	]
 	for r: int in range(rows.size()):
-		for c: int in range(4):
+		for c: int in range(TALLY_COLUMNS.size() - 1):
 			var v: float = float(rows[r][c])
 			var cell_label: Label = tally_cells[r][c]
-			if c == 3:
-				cell_label.text = percent(v)
-			elif v < 0.005:
+			if v < 0.005:
 				cell_label.text = "0%"
 			else:
 				cell_label.text = ("+" if c == 0 else "-") + percent(v)
@@ -346,15 +344,14 @@ func _build_tally(parent: Control) -> void:
 		name_label.add_theme_color_override("font_color", row[1])
 		grid.add_child(name_label)
 		var cells: Array[Label] = []
-		for c: int in range(4):
+		for c: int in range(TALLY_COLUMNS.size() - 1):
 			var value: Label = _label("", 15)
 			value.add_theme_color_override("font_color", row[1])
 			value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			grid.add_child(value)
 			cells.append(value)
 		tally_cells.append(cells)
-	_explain(parent, "Drunk, Sweat and Urine: how much has gone in (+) or out (-) since the start. "
-			+ "Blood now: how much the blood holds now.")
+	_explain(parent, "Drunk, Sweat and Urine: how much has gone in (+) or out (-) since the start.")
 	saltiness = _label("", 14)
 	saltiness.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	saltiness.custom_minimum_size = Vector2(300, 0)

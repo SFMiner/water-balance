@@ -24,7 +24,7 @@ sims.mr-miner.com (decided 2026-10-10), not a mode of the osmosis simulation.
       or sodium leaves 110-170 mEq/L: classroom stops so extreme runs don't show unsurvivable values
 - [x] Keep this run: a dashed, labelled line to compare with the next run
 - [x] Body pane: the diagram and observation on the left; on the right the water and salt tally (drunk, sweat,
-      urine, blood now) as percentages of what the blood held at the start, with what the numbers mean, then
+      urine) as percentages of what the blood held at the start, with what the numbers mean, then
       "blood saltiness = salt ÷ water = ... mEq/L", the sodium gauge and the medical data. Students see a runner
       lose more salt than a resting runner yet keep saltier blood (sweat takes out even more water)
 - [x] Plain-language observation line (blood saltier/diluted, water into/out of cells, ADH and kidneys)

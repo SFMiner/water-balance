@@ -136,8 +136,8 @@ func _test_screen() -> void:
 	_check(main.controller.run_state == "finished", "the race finishes")
 	_check(main.run_button.text == "Run again", "the run button offers to run again")
 	var end: Dictionary = main.controller.snapshot()
-	_check(main.tally_cells[1][1].text == "-" + main.percent(float(end.sweat_solute)) and main.tally_cells[0][3].text == main.percent(float(end.w_out)),
-			"the tally shows salt lost in sweat and the blood's water, as percentages of the start")
+	_check(main.tally_cells[1][1].text == "-" + main.percent(float(end.sweat_solute)) and main.tally_cells[0].size() == 3,
+			"the tally shows salt lost in sweat, as a percentage of the start, with no blood column")
 	_check(main.percent(0.674) == "67%" and main.percent(1.75) == "175%", "amounts show as whole percentages")
 	_check(main.saltiness.text.contains("%.2f" % float(end.c_out)), "the saltiness line shows salt / water")
 	main.keep_run()
